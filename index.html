@@ -53,7 +53,9 @@ body{display:flex;justify-content:center;align-items:center}button{cursor:pointe
   <div class="pill">🎮 <span id="modeHud">Easy</span></div>
  </div>
  <div id="player"></div><div id="weather"></div><div id="nightShade"></div>
- <button id="shopBtn" type="button">🛒 SHOP</button><button id="muteBtn" type="button">🔊 ON</button>
+ <button id="shopBtn" type="button">🛒 OPEN SHOP</button><button id="muteBtn" type="button">🔊 ON</button>
+<button id="overlayShopBtn" class="mainBtn" type="button">🛒 OPEN SHOP</button>
+<button id="startBtn" type="button">🏁 START RACE</button>
  <button id="nitroBtn" type="button">🚀 NITRO</button>
  <div id="controls"><button class="control" id="leftBtn" type="button">⬅</button><button class="control" id="rightBtn" type="button">➡</button></div>
  <div id="message"></div>
@@ -118,7 +120,12 @@ function move(dir){if(!running)return;const next=Math.max(0,Math.min(2,lane+dir)
 function useNitro(){if(!running)return;const now=performance.now();if(now<nitroUntil)return;nitroUntil=now+(2200+nitroLevel*600);beep(240,.2,'sawtooth',.05)}
 $('leftBtn').addEventListener('pointerdown',e=>{e.preventDefault();move(-1)});$('rightBtn').addEventListener('pointerdown',e=>{e.preventDefault();move(1)});nitroBtn.addEventListener('pointerdown',e=>{e.preventDefault();useNitro()});
 window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key.toLowerCase()==='a'){e.preventDefault();move(-1)}if(e.key==='ArrowRight'||e.key.toLowerCase()==='d'){e.preventDefault();move(1)}if((e.key===' '||e.key.toLowerCase()==='n')&&running){e.preventDefault();useNitro()}if((e.key==='Enter'||e.key===' ')&&!running&&$('shopPanel').style.display!=='block')startGame()});
-$('startBtn').addEventListener('click',startGame);$('muteBtn').addEventListener('click',()=>{soundOn=!soundOn;$('muteBtn').textContent=soundOn?'🔊 ON':'🔇 OFF';if(soundOn)beep(700,.1)});
+$('startBtn').addEventListener('click',startGame);
+$('overlayShopBtn').addEventListener('click',()=>{
+  renderShop();
+  $('shopPanel').style.display='block';
+});
+$('muteBtn').addEventListener('click',()=>{soundOn=!soundOn;$('muteBtn').textContent=soundOn?'🔊 ON':'🔇 OFF';if(soundOn)beep(700,.1)});
 $('shopBtn').addEventListener('click',()=>{renderShop();$('shopPanel').style.display='block'});$('closeShop').addEventListener('click',()=>$('shopPanel').style.display='none');
 document.querySelectorAll('.modeBtn').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.mode;document.querySelectorAll('.modeBtn').forEach(x=>x.classList.toggle('selected',x===b));beep(550,.06)}));
 setCarColor();renderCars();bestHud.textContent=best;bestScoreEl.textContent=best;updatePlayerPosition();window.addEventListener('resize',updatePlayerPosition);
