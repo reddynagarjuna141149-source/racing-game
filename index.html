@@ -17,26 +17,27 @@
 .traffic,.police{position:absolute;width:42px;height:68px;top:-90px;z-index:2;border-radius:10px;border:2px solid #ffffffbf;box-shadow:0 8px 12px #0009;transition:transform .08s linear}
 .traffic:before,.police:before{content:"";position:absolute;left:6px;top:11px;width:26px;height:22px;background:linear-gradient(#d6f8ff,#487d9b);border:2px solid #222;border-radius:5px}
 .traffic:after,.police:after{content:"";position:absolute;bottom:5px;left:5px;width:28px;height:6px;background:#ff4545;border-radius:3px}
-.police{background:linear-gradient(90deg,#f4f4f4 0 35%,#1951a4 35% 75%,#f4f4f4 75%)}
+.police{display:none!important;background:linear-gradient(90deg,#f4f4f4 0 35%,#1951a4 35% 75%,#f4f4f4 75%)}
 .police:before{background:linear-gradient(90deg,#d7f4ff,#77bde0)}
 
 .coin{
   position:absolute;
-  width:28px;
-  height:28px;
+  width:36px;
+  height:36px;
   display:flex;
   align-items:center;
   justify-content:center;
   border-radius:50%;
-  border:3px solid #fff3a6;
-  background:radial-gradient(circle at 30% 25%,#fff9a8 0 12%,#ffd700 38%,#ff9800 100%);
-  color:#fff;
-  font-size:19px;
+  border:3px solid #fff7b0;
+  background:radial-gradient(circle at 30% 25%,#fffde0 0 10%,#ffe94a 22%,#ffb700 62%,#e87800 100%);
+  color:#7b3900;
+  font-size:24px;
   font-weight:900;
   line-height:1;
-  text-shadow:0 1px 3px #8a4b00;
-  box-shadow:0 0 10px #ffd700, inset 0 0 4px #fff;
-  z-index:3;
+  text-shadow:0 1px 2px #fff5b0;
+  box-shadow:0 0 18px 5px #ffd700bb, inset 0 0 5px #fff;
+  z-index:8;
+  pointer-events:none;
   animation:coinSpin .7s infinite alternate ease-in-out;
 }
 @keyframes coinSpin{
@@ -92,13 +93,25 @@ function renderCars(){const box=$('carChoices');box.innerHTML='';cars.filter(c=>
 function renderShop(){$('shopCoins').textContent=bank;const box=$('shopItems');box.innerHTML='';cars.forEach(c=>{const owned=unlocked.includes(c.id),item=document.createElement('div');item.className='shopItem';item.innerHTML=`<div style="font-size:23px">🚗</div><b>${c.name}</b><div style="color:${c.color}">Car upgrade</div><div>${c.price===0?'FREE':c.price+' coins'}</div>`;const b=document.createElement('button');b.textContent=owned?(selectedCar===c.id?'SELECTED':'SELECT'):c.price+' 🪙 BUY';b.onclick=()=>{if(!owned){if(bank<c.price){say('Not enough coins!');return}bank-=c.price;unlocked.push(c.id);save();say(c.name+' unlocked!')}selectedCar=c.id;setCarColor();renderShop()};item.appendChild(b);box.appendChild(item)});const item=document.createElement('div');item.className='shopItem';item.innerHTML=`<div style="font-size:23px">🚀</div><b>Nitro Upgrade Lv.${nitroLevel}/5</b><div>Longer boost</div><div>${nitroLevel>=5?'MAX':(50+nitroLevel*35)+' coins'}</div>`;const b=document.createElement('button');b.textContent=nitroLevel>=5?'MAX LEVEL':'UPGRADE';b.disabled=nitroLevel>=5;b.onclick=()=>{const cost=50+nitroLevel*35;if(bank<cost){say('Not enough coins!');return}bank-=cost;nitroLevel++;save();renderShop();say('Nitro upgraded!')};item.appendChild(b);box.appendChild(item);$('shopCoins').textContent=bank}
 function updatePlayerPosition(){const rr=road.getBoundingClientRect(),gr=game.getBoundingClientRect();player.style.left=(rr.left-gr.left+rr.width*laneCenters[lane]-player.offsetWidth/2)+'px'}
 function spawnTraffic(isPolice=false){const el=document.createElement('div');el.className=isPolice?'police':'traffic';if(!isPolice){const colors=['#2878d0','#f4a623','#7b4bb7','#20a17a','#eee'];el.style.background=colors[Math.floor(Math.random()*colors.length)]}const l=Math.floor(Math.random()*3);el.style.left=(road.offsetLeft+road.clientWidth*laneCenters[l]-21)+'px';el.style.top='-90px';game.appendChild(el);traffic.push({el,lane:l,y:-90,police:isPolice})}
-function makeCoin(){const el=document.createElement('div');el.className='coin';el.textContent='★';const l=Math.floor(Math.random()*3);const rr=road.getBoundingClientRect(),gr=game.getBoundingClientRect();el.style.left=(rr.left-gr.left+rr.width*laneCenters[l]-14)+'px';el.style.top='-45px';game.appendChild(el);coins.push({el,lane:l,y:-45})}
+function makeCoin(){
+  const el=document.createElement('div');
+  el.className='coin';
+  el.textContent='🪙';
+  const l=Math.floor(Math.random()*3);
+  const rr=road.getBoundingClientRect(),gr=game.getBoundingClientRect();
+  const x=rr.left-gr.left+rr.width*laneCenters[l]-19;
+  el.style.left=Math.max(2,Math.min(game.clientWidth-40,x))+'px';
+  el.style.top='-42px';
+  game.appendChild(el);
+  coins.push({el,lane:l,y:-42});
+});
+}
 function overlaps(a,b){const A=a.getBoundingClientRect(),B=b.getBoundingClientRect();return A.left<B.right-4&&A.right>B.left+4&&A.top<B.bottom-4&&A.bottom>B.top+4}
 function clearObjects(){traffic.forEach(o=>o.el.remove());coins.forEach(o=>o.el.remove());traffic=[];coins=[]}
 function setWeather(){const choice=Math.random();if(choice<.34){$('weather').style.display='block';$('nightShade').style.display='none';say('Rain mode!')}else if(choice<.58){$('weather').style.display='none';$('nightShade').style.display='block';say('Night mode!')}else{$('weather').style.display='none';$('nightShade').style.display='none'}}
-function startGame(){initAudio();clearObjects();running=true;lane=1;distance=0;runCoins=0;lineOffset=0;spawnTimer=0;coinTimer=0;policeTimer=0;nitroUntil=0;lastTime=performance.now();distanceEl.textContent='0';coinsEl.textContent='0';speedEl.textContent='1';$('modeHud').textContent=mode;setWeather();updatePlayerPosition();nitroBtn.classList.remove('active');$('shopPanel').style.display='none';overlay.classList.add('hidden');beep(700,.1,'triangle');requestAnimationFrame(loop)}
+function startGame(){initAudio();clearObjects();running=true;lane=1;distance=0;runCoins=0;lineOffset=0;spawnTimer=0;coinTimer=48;policeTimer=0;nitroUntil=0;lastTime=performance.now();distanceEl.textContent='0';coinsEl.textContent='0';speedEl.textContent='1';$('modeHud').textContent=mode;setWeather();updatePlayerPosition();nitroBtn.classList.remove('active');$('shopPanel').style.display='none';overlay.classList.add('hidden');beep(700,.1,'triangle');requestAnimationFrame(loop)}
 function gameOver(){if(!running)return;running=false;beep(130,.4,'sawtooth',.08);const finalDistance=Math.floor(distance);bank+=runCoins;if(finalDistance>best)best=finalDistance;save();bestHud.textContent=best;bestScoreEl.textContent=best;$('overlayTitle').textContent='💥 GAME OVER';$('overlayText').innerHTML=`Distance: <b>${finalDistance} m</b><br>Coins this race: <b>${runCoins}</b><br>Coins in bank: <b>${bank}</b><br>Best score: <b>${best} m</b>`;$('startBtn').textContent='🏁 RACE AGAIN';overlay.classList.remove('hidden')}
-function loop(now){if(!running)return;const dt=Math.min((now-lastTime)/16.67,2.5);lastTime=now;const nitro=now<nitroUntil,config=modes[mode],car=cars.find(c=>c.id===selectedCar)||cars[0],base=(3.1+Math.min(7,distance/180))*config.mult*car.boost,gameSpeed=base*(nitro?2.05:1);distance+=dt*(.62+base*.13)*(nitro?1.65:1);const speedLevel=Math.min(10,1+Math.floor(distance/120));distanceEl.textContent=Math.floor(distance);speedEl.textContent=speedLevel+(nitro?'🚀':'');nitroBtn.classList.toggle('active',nitro);lineOffset=(lineOffset+gameSpeed*dt)%150;lines.forEach((line,i)=>line.style.top=(lineOffset-100+i*75)+'px');spawnTimer+=dt;if(spawnTimer>Math.max(24,config.spawn-speedLevel*2.2)){spawnTraffic(false);spawnTimer=0}coinTimer+=dt;if(coinTimer>58){makeCoin();coinTimer=0}policeTimer+=dt;if(distance>90&&policeTimer>config.police){spawnTraffic(true);policeTimer=0}
+function loop(now){if(!running)return;const dt=Math.min((now-lastTime)/16.67,2.5);lastTime=now;const nitro=now<nitroUntil,config=modes[mode],car=cars.find(c=>c.id===selectedCar)||cars[0],base=(3.1+Math.min(7,distance/180))*config.mult*car.boost,gameSpeed=base*(nitro?2.05:1);distance+=dt*(.62+base*.13)*(nitro?1.65:1);const speedLevel=Math.min(10,1+Math.floor(distance/120));distanceEl.textContent=Math.floor(distance);speedEl.textContent=speedLevel+(nitro?'🚀':'');nitroBtn.classList.toggle('active',nitro);lineOffset=(lineOffset+gameSpeed*dt)%150;lines.forEach((line,i)=>line.style.top=(lineOffset-100+i*75)+'px');spawnTimer+=dt;if(spawnTimer>Math.max(24,config.spawn-speedLevel*2.2)){spawnTraffic(false);spawnTimer=0}coinTimer+=dt;if(coinTimer>32){makeCoin();coinTimer=0}policeTimer+=dt;
 for(let i=traffic.length-1;i>=0;i--){const o=traffic[i];
 // Police actively chase the player's current lane and move faster as distance increases.
 if(o.police){o.chaseTick=(o.chaseTick||0)+dt;if(o.chaseTick>16){o.chaseTick=0;if(o.lane<lane)o.lane++;else if(o.lane>lane)o.lane--;const rr=road.getBoundingClientRect(),gr=game.getBoundingClientRect();o.el.style.left=(rr.left-gr.left+rr.width*laneCenters[o.lane]-o.el.offsetWidth/2)+'px';}o.y+=gameSpeed*dt*(1.08+Math.min(.45,distance/1800));o.el.style.filter='drop-shadow(0 0 7px #ff2222)';}else{o.y+=gameSpeed*dt;}
