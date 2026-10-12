@@ -22,23 +22,20 @@
 
 .coin{
   position:absolute;
-  width:36px;
-  height:36px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  width:36px;height:36px;
+  display:flex;align-items:center;justify-content:center;
   border-radius:50%;
-  border:3px solid #fff7b0;
-  background:radial-gradient(circle at 30% 25%,#fffde0 0 10%,#ffe94a 22%,#ffb700 62%,#e87800 100%);
-  color:#7b3900;
-  font-size:24px;
-  font-weight:900;
-  line-height:1;
-  text-shadow:0 1px 2px #fff5b0;
-  box-shadow:0 0 18px 5px #ffd700bb, inset 0 0 5px #fff;
-  z-index:8;
-  pointer-events:none;
+  border:3px solid #fff5a3;
+  background:radial-gradient(circle at 30% 25%,#fffbd0 0 10%,#ffe94a 22%,#ffb700 62%,#e87800 100%);
+  color:#8a4200;font-size:25px;font-weight:900;line-height:1;
+  text-shadow:0 1px 2px #fff5a3;
+  box-shadow:0 0 18px 5px #ffd700bb,inset 0 0 5px #fff;
+  z-index:8;pointer-events:none;
   animation:coinSpin .7s infinite alternate ease-in-out;
+}
+@keyframes coinSpin{
+  from{transform:scaleX(.78) rotate(-8deg);filter:brightness(1)}
+  to{transform:scaleX(1) rotate(8deg);filter:brightness(1.25)}
 }
 @keyframes coinSpin{
   from{transform:scaleX(.72) rotate(-8deg);filter:brightness(1)}
@@ -94,17 +91,20 @@ function renderShop(){$('shopCoins').textContent=bank;const box=$('shopItems');b
 function updatePlayerPosition(){const rr=road.getBoundingClientRect(),gr=game.getBoundingClientRect();player.style.left=(rr.left-gr.left+rr.width*laneCenters[lane]-player.offsetWidth/2)+'px'}
 function spawnTraffic(isPolice=false){const el=document.createElement('div');el.className=isPolice?'police':'traffic';if(!isPolice){const colors=['#2878d0','#f4a623','#7b4bb7','#20a17a','#eee'];el.style.background=colors[Math.floor(Math.random()*colors.length)]}const l=Math.floor(Math.random()*3);el.style.left=(road.offsetLeft+road.clientWidth*laneCenters[l]-21)+'px';el.style.top='-90px';game.appendChild(el);traffic.push({el,lane:l,y:-90,police:isPolice})}
 function makeCoin(){
-  const el=document.createElement('div');
-  el.className='coin';
-  el.textContent='🪙';
-  const l=Math.floor(Math.random()*3);
-  const rr=road.getBoundingClientRect(),gr=game.getBoundingClientRect();
-  const x=rr.left-gr.left+rr.width*laneCenters[l]-19;
-  el.style.left=Math.max(2,Math.min(game.clientWidth-40,x))+'px';
-  el.style.top='-42px';
+  const el = document.createElement('div');
+  el.className = 'coin';
+  el.textContent = '★';
+  const laneIndex = Math.floor(Math.random() * 3);
+  const roadRect = road.getBoundingClientRect();
+  const gameRect = game.getBoundingClientRect();
+  const coinSize = 36;
+  const x = roadRect.left - gameRect.left
+          + roadRect.width * laneCenters[laneIndex]
+          - coinSize / 2;
+  el.style.left = Math.max(2, Math.min(game.clientWidth - coinSize - 2, x)) + 'px';
+  el.style.top = '-42px';
   game.appendChild(el);
-  coins.push({el,lane:l,y:-42});
-});
+  coins.push({ el: el, lane: laneIndex, y: -42 });
 }
 function overlaps(a,b){const A=a.getBoundingClientRect(),B=b.getBoundingClientRect();return A.left<B.right-4&&A.right>B.left+4&&A.top<B.bottom-4&&A.bottom>B.top+4}
 function clearObjects(){traffic.forEach(o=>o.el.remove());coins.forEach(o=>o.el.remove());traffic=[];coins=[]}
