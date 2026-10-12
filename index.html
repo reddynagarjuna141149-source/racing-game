@@ -109,7 +109,26 @@ function makeCoin(){
 function overlaps(a,b){const A=a.getBoundingClientRect(),B=b.getBoundingClientRect();return A.left<B.right-4&&A.right>B.left+4&&A.top<B.bottom-4&&A.bottom>B.top+4}
 function clearObjects(){traffic.forEach(o=>o.el.remove());coins.forEach(o=>o.el.remove());traffic=[];coins=[]}
 function setWeather(){const choice=Math.random();if(choice<.34){$('weather').style.display='block';$('nightShade').style.display='none';say('Rain mode!')}else if(choice<.58){$('weather').style.display='none';$('nightShade').style.display='block';say('Night mode!')}else{$('weather').style.display='none';$('nightShade').style.display='none'}}
-function startGame(){initAudio();clearObjects();running=true;lane=1;distance=0;runCoins=0;lineOffset=0;spawnTimer=0;coinTimer=48;policeTimer=0;nitroUntil=0;lastTime=performance.now();distanceEl.textContent='0';coinsEl.textContent='0';speedEl.textContent='1';$('modeHud').textContent=mode;setWeather();updatePlayerPosition();nitroBtn.classList.remove('active');$('shopPanel').style.display='none';overlay.classList.add('hidden');beep(700,.1,'triangle');requestAnimationFrame(loop)}
+function startGame(){
+  try {
+    initAudio(); clearObjects();
+    running=true; lane=1; distance=0; runCoins=0; lineOffset=0;
+    spawnTimer=0; coinTimer=0; policeTimer=0; nitroUntil=0;
+    lastTime=performance.now();
+    distanceEl.textContent='0'; coinsEl.textContent='0'; speedEl.textContent='1';
+    $('modeHud').textContent=mode;
+    setWeather(); updatePlayerPosition(); nitroBtn.classList.remove('active');
+    $('shopPanel').style.display='none'; overlay.classList.add('hidden');
+    $('startBtn').textContent='🏁 RACE AGAIN';
+    beep(700,.1,'triangle');
+    requestAnimationFrame(loop);
+  } catch(err) {
+    running=false; overlay.classList.remove('hidden');
+    $('overlayTitle').textContent='Game start error';
+    $('overlayText').textContent='Please refresh the page and try again. Error: '+err.message;
+    console.error('Game start error:',err);
+  }
+}
 function gameOver(){if(!running)return;running=false;beep(130,.4,'sawtooth',.08);const finalDistance=Math.floor(distance);bank+=runCoins;if(finalDistance>best)best=finalDistance;save();bestHud.textContent=best;bestScoreEl.textContent=best;$('overlayTitle').textContent='💥 GAME OVER';$('overlayText').innerHTML=`Distance: <b>${finalDistance} m</b><br>Coins this race: <b>${runCoins}</b><br>Coins in bank: <b>${bank}</b><br>Best score: <b>${best} m</b>`;$('startBtn').textContent='🏁 RACE AGAIN';overlay.classList.remove('hidden')}
 function loop(now){if(!running)return;const dt=Math.min((now-lastTime)/16.67,2.5);lastTime=now;const nitro=now<nitroUntil,config=modes[mode],car=cars.find(c=>c.id===selectedCar)||cars[0],base=(3.1+Math.min(7,distance/180))*config.mult*car.boost,gameSpeed=base*(nitro?2.05:1);distance+=dt*(.62+base*.13)*(nitro?1.65:1);const speedLevel=Math.min(10,1+Math.floor(distance/120));distanceEl.textContent=Math.floor(distance);speedEl.textContent=speedLevel+(nitro?'🚀':'');nitroBtn.classList.toggle('active',nitro);lineOffset=(lineOffset+gameSpeed*dt)%150;lines.forEach((line,i)=>line.style.top=(lineOffset-100+i*75)+'px');spawnTimer+=dt;if(spawnTimer>Math.max(24,config.spawn-speedLevel*2.2)){spawnTraffic(false);spawnTimer=0}coinTimer+=dt;if(coinTimer>32){makeCoin();coinTimer=0}policeTimer+=dt;
 for(let i=traffic.length-1;i>=0;i--){const o=traffic[i];
@@ -121,7 +140,8 @@ function move(dir){if(!running)return;lane=Math.max(0,Math.min(2,lane+dir));upda
 function useNitro(){if(!running)return;const now=performance.now();if(now<nitroUntil)return;nitroUntil=now+(2200+nitroLevel*600)}
 $('leftBtn').addEventListener('pointerdown',e=>{e.preventDefault();move(-1)});$('rightBtn').addEventListener('pointerdown',e=>{e.preventDefault();move(1)});nitroBtn.addEventListener('pointerdown',e=>{e.preventDefault();useNitro()});
 window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key.toLowerCase()==='a')move(-1);if(e.key==='ArrowRight'||e.key.toLowerCase()==='d')move(1);if((e.key===' '||e.key.toLowerCase()==='n')&&running)useNitro();if((e.key==='Enter'||e.key===' ')&&!running&&$('shopPanel').style.display!=='block')startGame()});
-$('startBtn').addEventListener('click',startGame);$('overlayShopBtn').addEventListener('click',()=>{renderShop();$('shopPanel').style.display='block'});$('muteBtn').addEventListener('click',()=>{soundOn=!soundOn;$('muteBtn').textContent=soundOn?'🔊 ON':'🔇 OFF'});$('shopBtn').addEventListener('click',()=>{renderShop();$('shopPanel').style.display='block'});$('closeShop').addEventListener('click',()=>$('shopPanel').style.display='none');
+$('startBtn').addEventListener('click',function(e){e.preventDefault();e.stopPropagation();startGame();});
+$('startBtn').addEventListener('pointerup',function(e){e.preventDefault();if(!running)startGame();});$('overlayShopBtn').addEventListener('click',()=>{renderShop();$('shopPanel').style.display='block'});$('muteBtn').addEventListener('click',()=>{soundOn=!soundOn;$('muteBtn').textContent=soundOn?'🔊 ON':'🔇 OFF'});$('shopBtn').addEventListener('click',()=>{renderShop();$('shopPanel').style.display='block'});$('closeShop').addEventListener('click',()=>$('shopPanel').style.display='none');
 document.querySelectorAll('.modeBtn').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.mode;document.querySelectorAll('.modeBtn').forEach(x=>x.classList.toggle('selected',x===b))}));
 setCarColor();renderCars();bestHud.textContent=best;bestScoreEl.textContent=best;updatePlayerPosition();window.addEventListener('resize',updatePlayerPosition);
 })();
